@@ -62,7 +62,7 @@ export default function Manage() {
       case "add":
         const iid = generateBarcode(canvasRef);
         data = { id: iid, name: name, price: price };
-        res = await fetch("http://localhost:3000/api/add", {
+        res = await fetch("/api/add", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export default function Manage() {
         break;
       case "edit":
         data = { id: id, name: name, price: price };
-        res = await fetch("http://localhost:3000/api/edit", {
+        res = await fetch("/api/edit", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -81,7 +81,7 @@ export default function Manage() {
         });
         break;
       case "delete":
-        res = await fetch(`http://localhost:3000/api/delete?id=${id}`, {
+        res = await fetch(`/api/delete?id=${id}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
