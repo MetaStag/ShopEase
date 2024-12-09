@@ -46,7 +46,7 @@ const generateChecksum = (inp: string): number => {
   return checksum;
 };
 
-// Generate barcode text - 10101010....
+// Generate barcode text in binary - 10101010....
 const generateBarcodeText = (
   mcode: string,
   pcode: string,
@@ -54,22 +54,27 @@ const generateBarcodeText = (
 ): string => {
   let bar: string = "101"; // Left Guard
   for (const ch of mcode) {
-    // Encode Manufacturer Code
-    bar += lcode[ch];
+    bar += lcode[ch]; // Encode Manufacturer Code
   }
   bar += "01010"; // Middle Guard
   for (const ch of pcode) {
-    // Encode Product Code
-    bar += rcode[ch];
+    bar += rcode[ch]; // Encode Product Code
   }
   bar += rcode[checksum]; // Checksum
   bar += "101"; // Right Guard
   return bar;
 };
 
+// Generate random Manufacturer and Product Code
+const generateRandomNumber = (size: number): string => {
+  let result = "";
+  for (let i = 0; i < size; i++) result += Math.floor(Math.random() * 10);
+  return result;
+};
+
 export default function generateBarcode(canvasRef: any): string {
-  let mcode: string = "735272"; // Needs to be randomly generated
-  let pcode: string = "73070";
+  let mcode: string = generateRandomNumber(6); // manufacturer code of length 6
+  let pcode: string = generateRandomNumber(5); // product code of length 5
   let checksum = generateChecksum(mcode + pcode);
   const barcode = mcode + pcode + checksum;
   const barcodeText = generateBarcodeText(mcode, pcode, checksum);

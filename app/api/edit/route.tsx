@@ -1,13 +1,21 @@
 import { db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 
+// UPDATE document based on Id
+// request body
+// {
+//   id: number,
+//   name: string,
+//   price: number
+// }
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     // Data validation
     let { id, name, price, ...extraData } = body;
     id = parseInt(id, 10);
-    price = parseFloat(id);
+    price = parseFloat(price);
     if (isNaN(id)) throw new Error("Invalid Id");
     if (isNaN(price)) throw new Error("Invalid price");
     if (!name || typeof name !== "string") throw new Error("Invalid name");
@@ -26,7 +34,7 @@ export async function POST(req: Request) {
       }
     );
   } catch (err: any) {
-    if (!err.message) err.message = "Invalid body";
+    if (!err.message) err.message = "Invalid request";
     return Response.json(
       {
         message: err.message,

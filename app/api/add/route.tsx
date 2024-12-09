@@ -1,6 +1,13 @@
 import { db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 
+// ADD product
+// request body
+// {
+//   id: number,
+//   name: string,
+//   price: number
+// }
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -24,7 +31,7 @@ export async function POST(req: Request) {
       }
     );
   } catch (err: any) {
-    if (!err.message) err.message = "Invalid body";
+    if (!err.message) err.message = "Invalid request";
     return Response.json(
       { message: err.message },
       {

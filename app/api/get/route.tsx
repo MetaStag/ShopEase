@@ -2,6 +2,8 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { type NextRequest } from "next/server";
 
+// GET product based on Id
+// query parameter - id
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
@@ -11,9 +13,12 @@ export async function GET(req: NextRequest) {
     const docRef = doc(db, "products", `${query}`);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return Response.json({id: query, ...docSnap.data()}, {
-        status: 200,
-      });
+      return Response.json(
+        { id: query, ...docSnap.data() },
+        {
+          status: 200,
+        }
+      );
     } else {
       return Response.json(
         { message: "No product with this Id exists" },
@@ -23,7 +28,6 @@ export async function GET(req: NextRequest) {
       );
     }
   } catch (err: any) {
-    console.log(err);
     if (!err.message) err.message = "Invalid request";
     return Response.json(
       {

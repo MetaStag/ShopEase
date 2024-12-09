@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -11,75 +11,49 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import DialogBox from "./dialogbox";
 
 import { loginAdmin, getIDToken } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "./ui/toaster";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { toast } = useToast()
+  const { toast } = useToast();
 
-  const login = async () => {
+  const login = async (email: string, password: string) => {
+    // Input validation
     if (typeof email !== "string" || email.trim().length === 0) {
       toast({
         title: "Invalid input",
-        description: "Enter a proper username"
-      })
+        description: "Enter a proper username",
+      });
       return;
     }
     if (typeof password !== "string" || password.trim().length === 0) {
       toast({
         title: "Invalid input",
-        description: "Enter a proper password"
-      })
+        description: "Enter a proper password",
+      });
       return;
     }
+
+    // Login using Firebase Auth
     const user = await loginAdmin(email, password);
-    const token = await getIDToken()
-    const response = await fetch('/api/test', {
-      method: 'GET',
+    const token = await getIDToken();
+    const response = await fetch("/api/test", {
+      method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    const data = await response.json()
-    console.log(data)
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    console.log(data); // delete later
   };
 
   return (
     <div>
       <Toaster />
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button>Login</Button>
-        </DialogTrigger>
-        <DialogContent className="w-96">
-          <DialogHeader>
-            <DialogTitle>Log In</DialogTitle>
-            <DialogDescription>Enter your email and password</DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col">
-            <span>Email</span>
-            <input
-              className="mb-2 border-2 border-zinc-500 rounded-md p-2 w-64"
-              placeholder="Enter email:"
-              onChange={(e) => setEmail(e.target.value)}
-            ></input>
-            <span>Password</span>
-            <input
-              className="mb-4 border-2 border-zinc-500 rounded-md p-2 w-64"
-              type="text"
-              placeholder="Enter password:"
-              onChange={(e) => setPassword(e.target.value)}
-            ></input>
-          </div>
-          <DialogFooter>
-            <Button className='self-center' onClick={login}>Submit</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DialogBox name="Login" option1="Email" option2="Password" func={login} />
     </div>
   );
 }

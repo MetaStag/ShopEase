@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function Checkout() {
+  // Product Schema
   interface Product {
     id: string;
     name: string;
@@ -25,6 +26,7 @@ export default function Checkout() {
   const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
 
+  // Decode product id from barcode image
   const decodeBarcode = async (e: any) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -46,6 +48,7 @@ export default function Checkout() {
     }
   };
 
+  // Fetch product details from Id
   const fetchProduct = async (code: number) => {
     if (!code) return;
     const response = await fetch(`/api/get?id=${code}`);

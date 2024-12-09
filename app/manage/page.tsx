@@ -1,99 +1,108 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+  Table,
+  TableHeader,
+  TableCaption,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableHead,
+} from "@/components/ui/table";
+
+import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
+import DialogBox from "@/components/dialogbox";
 import { useToast } from "@/hooks/use-toast";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import generateBarcode from "./generate";
 
 export default function Manage() {
-  const [choice, setChoice] = useState("");
-  const [addtoggle, setAddToggle] = useState(true);
-  const [deletetoggle, setDeleteToggle] = useState(false);
-  const [id, setId] = useState("");
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  interface Product {
+    id: number;
+    name: string;
+    price: number;
+  }
+
+  const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
   const canvasRef = useRef(null);
 
-  const validateInput = () => {
-    console.log(id, name, price);
-    if (choice !== "add") {
-      if (!parseFloat(id)) {
-        toast({
-          title: "Validation failed",
-          description: "Invalid Id entered",
-        });
-        return;
-      }
+  useEffect(() => {
+    fetch("/api/all")
+      .then((res) => res.json())
+      .then((data) => setProducts(data.documents))
+      .catch((err) => console.log(err));
+  }, []);
+
+  const addProduct = async (name: string, price: string) => {
+    if (!parseFloat(price)) {
+      toast({
+        title: "Validation failed",
+        description: "Price should be a float",
+      });
+      return;
     }
-    if (choice !== "delete") {
-      if (!parseFloat(price)) {
-        toast({
-          title: "Validation failed",
-          description: "Price should be a float",
-        });
-        return;
-      }
-      if (typeof name !== "string" || name.trim().length === 0) {
-        toast({
-          title: "Validation failed",
-          description: "Enter a proper name",
-        });
-        return;
-      }
+    if (typeof name !== "string" || name.trim().length === 0) {
+      toast({
+        title: "Validation failed",
+        description: "Enter a proper name",
+      });
+      return;
     }
-    sendRequest();
+
+    const iid = generateBarcode(canvasRef);
+    const data = { id: iid, name: name, price: price };
+    const res = await fetch("/api/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+    let message;
+    if (!result.message) message = "Invalid request";
+    else message = result.message;
+    toast({
+      title: "Result",
+      description: message,
+    });
   };
 
-  const sendRequest = async () => {
-    let message;
-    let data;
-    let res: Response | null = null;
-    switch (choice) {
-      case "add":
-        const iid = generateBarcode(canvasRef);
-        data = { id: iid, name: name, price: price };
-        res = await fetch("/api/add", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-        break;
-      case "edit":
-        data = { id: id, name: name, price: price };
-        res = await fetch("/api/edit", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-        break;
-      case "delete":
-        res = await fetch(`/api/delete?id=${id}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        break;
-      default:
-        throw new Error("Invalid value of choice");
-    }
+  const editProduct = async (id: number, name: string, price: string) => {
+    const data = { id: id, name: name, price: price };
+    const res = await fetch("/api/edit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
     const result = await res.json();
+    let message;
     if (!result.message) message = "Invalid request";
-    message = result.message;
+    else message = result.message;
+    toast({
+      title: "Result",
+      description: message,
+    });
+  };
+
+  const deleteProduct = async (id: number) => {
+    const res = await fetch(`/api/delete?id=${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await res.json();
+    let message;
+    if (!result.message) message = "Invalid request";
+    else message = result.message;
     toast({
       title: "Result",
       description: message,
@@ -101,59 +110,52 @@ export default function Manage() {
   };
 
   return (
-    <div className="bg-zinc-600 flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center mx-32">
       <Toaster />
       <span className="text-4xl font-bold mb-16">Manage Products</span>
-      <div className="flex flex-row justify-between w-6/12">
-        <div className="flex flex-col">
-          <span>Product Id</span>
-          <Input
-            disabled={addtoggle}
-            className="m-2 border-2 p-2 py-5 w-64"
-            placeholder="Enter product id:"
-            onChange={(e) => setId(e.target.value)}
-          ></Input>
-          <span>Product name</span>
-          <Input
-            disabled={deletetoggle}
-            className="m-2 border-2 p-2 py-5 w-64"
-            placeholder="Enter product name:"
-            onChange={(e) => setName(e.target.value)}
-          />
-          <span>Product price</span>
-          <Input
-            disabled={deletetoggle}
-            className="m-3 border-2 p-2 py-5 w-64"
-            placeholder="Enter product price:"
-            onChange={(e) => setPrice(e.target.value)}
-          />
-          <Button onClick={validateInput}>Submit</Button>
-        </div>
-        <div>
-          <Select
-            onValueChange={(option) => {
-              setChoice(option);
-              option === "add" ? setAddToggle(true) : setAddToggle(false);
-              option === "delete"
-                ? setDeleteToggle(true)
-                : setDeleteToggle(false);
-            }}
-          >
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="Choose Action" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="add">Add</SelectItem>
-              <SelectItem value="edit">Edit</SelectItem>
-              <SelectItem value="delete">Delete</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <Table>
+        <TableCaption>List of products</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Id</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead className="text-right">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {products ? (
+            products.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell className="p-6 text-lg">{product.id}</TableCell>
+                <TableCell className="text-lg">{product.name}</TableCell>
+                <TableCell className="text-lg">{product.price}</TableCell>
+                <TableCell className="text-right text-lg">
+                  <DialogBox
+                    name="Edit"
+                    option1="Name"
+                    option2="Price"
+                    func={(value1, value2) => {
+                      editProduct(product.id, value1, value2);
+                    }}
+                  />{" "}
+                  |{" "}
+                  <Button onClick={() => deleteProduct(product.id)}>
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <span>Loading /</span>
+          )}
+        </TableBody>
+      </Table>
+      <DialogBox name="Add" option1="Name" option2="Price" func={addProduct} />
       <canvas
         className="hidden"
         ref={canvasRef}
-        width={226}
+        width={226} // Dimensions of barcode image
         height={100}
       ></canvas>
     </div>

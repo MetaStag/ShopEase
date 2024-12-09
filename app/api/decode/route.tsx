@@ -3,6 +3,7 @@ import { writeFile } from "fs/promises";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
+// Execute the external BarcodeReaderCLI.exe file
 function runCommand(exe: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
     const proc = spawn(exe, args);
@@ -27,11 +28,13 @@ function runCommand(exe: string, args: string[]): Promise<string> {
   });
 }
 
+// DECODE barcode image to text
+// First image gets saved to public/uploads
+// Then BarcodeReaderCLI.exe extracts the text of that image in runCommand() above
 export async function POST(req: NextRequest, res: any) {
   const formData = await req.formData();
   const file = formData.get("file") as Blob | null;
-  if (!file)
-    return NextResponse.json({ message: "File not found" }, { status: 404 });
+  if (!file) throw new Error("File not found");
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const uploadDir = path.join(process.cwd(), "public/uploads");
@@ -42,11 +45,17 @@ export async function POST(req: NextRequest, res: any) {
     args.push("-type=upca");
     args.push(".\\public\\uploads\\barcode.png");
     let code: string = await runCommand(exe, args);
+    if (code === "") throw new Error("Error extracting id from barcode");
+    return Response.json({ message: code }, { status: 200 });
+  } catch (err: any) {
+    if (!err.message) err.message = "Invalid request";
     return Response.json(
-      { message: code },
-      { status: code === "" ? 404 : 200 }
+      {
+        message: err.message,
+      },
+      {
+        status: 400,
+      }
     );
-  } catch (err) {
-    return Response.json({ message: "Error!" }, { status: 500 });
   }
 }
