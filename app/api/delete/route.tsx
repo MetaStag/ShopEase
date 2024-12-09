@@ -23,7 +23,6 @@ export async function DELETE(req: NextRequest) {
     );
   } catch (err: any) {
     if (!err.message) err.message = "Invalid argument";
-    console.log(err);
     return Response.json(
       {
         message: err.message,

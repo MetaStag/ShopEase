@@ -11,6 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function Checkout() {
   interface Product {
@@ -21,44 +23,40 @@ export default function Checkout() {
 
   const [price, setPrice] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
+  const { toast } = useToast();
 
-  const scanBarcode = async (e:any) => {
-    console.log(process.env.HOME)
+  const decodeBarcode = async (e: any) => {
     const file = e.target.files[0];
-    if (!file) {
-      return
-    }
-    const blobURL = URL.createObjectURL(file);
-    const link = document.createElement('a')
-    link.href = blobURL
-    link.download = 'barcode.png'
-    link.click()
-  };
+    if (!file) return;
 
-  const decipherBarcode = async () => {
+    const formData = new FormData();
+    formData.append("file", file);
+
     const res = await fetch("/api/decode", {
-      method: "GET",
+      method: "POST",
+      body: formData,
     });
     const data = await res.json();
-    if (res.ok) {
-      return data.message;
-    } else {
-      return false;
+    if (res.ok) fetchProduct(parseInt(data.message));
+    else {
+      toast({
+        title: "Invalid barcode",
+        description: "Barcode scan failed. Try another one",
+      });
     }
   };
 
-  const fetchProduct = async () => {
-    const code = await decipherBarcode();
+  const fetchProduct = async (code: number) => {
     if (!code) return;
     const response = await fetch(`/api/get?id=${code}`);
     const res = await response.json();
     setProducts((pdts) => [...pdts, res]);
     setPrice(price + res.price);
-    console.log(res);
   };
 
   return (
     <div className="mx-32 my-16">
+      <Toaster />
       <div className="flex flex-row justify-between">
         <span className="text-4xl font-bold">Checkout</span>
         <div className="items-center gap-1.5">
@@ -67,7 +65,7 @@ export default function Checkout() {
             className="w-64"
             type="file"
             accept="image/*"
-            onChange={scanBarcode}
+            onChange={decodeBarcode}
           ></Input>
         </div>
       </div>
@@ -91,7 +89,6 @@ export default function Checkout() {
         </TableBody>
       </Table>
       <span className="flex justify-end text-2xl">Total: {price}</span>
-      <button onClick={fetchProduct}>asdf</button>
     </div>
   );
 }

@@ -13,7 +13,6 @@ export async function POST(req: Request) {
     if (!name || typeof name !== "string") throw new Error("Invalid name");
     if (Object.keys(extraData).length > 0)
       throw new Error("Extra fields found");
-    console.log(id, name, price);
 
     // Update document
     const docRef = doc(db, "products", `${id}`);
@@ -28,7 +27,6 @@ export async function POST(req: Request) {
     );
   } catch (err: any) {
     if (!err.message) err.message = "Invalid body";
-    console.log(err.message);
     return Response.json(
       {
         message: err.message,

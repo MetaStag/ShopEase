@@ -10,14 +10,8 @@ export default {
   theme: {
   	extend: {
   		colors: {
-			primary: {
-				DEFAULT: '#000',
-				foreground: '#FFF'
-			},
-			secondary: {
-				DEFAULT: '#FFF',
-				foreground: '#000'
-			}
+			primary: 'var(--color-primary)',
+			secondary: 'var(--color-secondary)'
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

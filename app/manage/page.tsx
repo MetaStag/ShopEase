@@ -101,7 +101,7 @@ export default function Manage() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="bg-zinc-600 flex flex-col justify-center items-center">
       <Toaster />
       <span className="text-4xl font-bold mb-16">Manage Products</span>
       <div className="flex flex-row justify-between w-6/12">

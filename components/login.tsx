@@ -13,23 +13,30 @@ import {
 } from "./ui/dialog";
 
 import { loginAdmin, getIDToken } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "./ui/toaster";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { toast } = useToast()
 
   const login = async () => {
     if (typeof email !== "string" || email.trim().length === 0) {
-      console.log("Enter a proper email");
+      toast({
+        title: "Invalid input",
+        description: "Enter a proper username"
+      })
       return;
     }
     if (typeof password !== "string" || password.trim().length === 0) {
-      console.log("Enter a proper password");
+      toast({
+        title: "Invalid input",
+        description: "Enter a proper password"
+      })
       return;
     }
-    console.log(email, password)
     const user = await loginAdmin(email, password);
-    console.log("Logged in");
     const token = await getIDToken()
     const response = await fetch('/api/test', {
       method: 'GET',
@@ -43,6 +50,7 @@ export default function Login() {
 
   return (
     <div>
+      <Toaster />
       <Dialog>
         <DialogTrigger asChild>
           <Button>Login</Button>

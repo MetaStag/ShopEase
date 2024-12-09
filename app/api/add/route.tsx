@@ -13,7 +13,6 @@ export async function POST(req: Request) {
     if (!name || typeof name !== "string") throw new Error("Invalid name");
     if (Object.keys(extraData).length > 0)
       throw new Error("Extra fields found");
-    console.log(id, name, price);
 
     // Add document
     const docRef = doc(db, "products", `${id}`);
