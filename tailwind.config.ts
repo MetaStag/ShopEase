@@ -10,8 +10,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "var(--color-primary)",
-        secondary: "var(--color-secondary)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        muted: "var(--muted)",
+        border: "var(--border)",
+        primary: "var(--primary)",
+        accent: "var(--accent)",
+        destructive: "var(--destructive)",
+        ring: "var(--ring)",
+        radius: "var(--radius)",
       },
       borderRadius: {
         lg: "var(--radius)",

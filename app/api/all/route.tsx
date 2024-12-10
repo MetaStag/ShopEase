@@ -10,7 +10,6 @@ export async function GET(req: Request) {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log(documents);
     return Response.json({ documents }, { status: 200 });
   } catch (err: any) {
     if (!err.message) err.message = "Invalid request";

@@ -116,7 +116,7 @@ export default function Manage() {
       <Table>
         <TableCaption>List of products</TableCaption>
         <TableHeader>
-          <TableRow>
+          <TableRow className="border-foreground">
             <TableHead>Id</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Price</TableHead>
@@ -126,7 +126,7 @@ export default function Manage() {
         <TableBody>
           {products ? (
             products.map((product) => (
-              <TableRow key={product.id}>
+              <TableRow className="border-border" key={product.id}>
                 <TableCell className="p-6 text-lg">{product.id}</TableCell>
                 <TableCell className="text-lg">{product.name}</TableCell>
                 <TableCell className="text-lg">{product.price}</TableCell>
@@ -147,7 +147,9 @@ export default function Manage() {
               </TableRow>
             ))
           ) : (
-            <span>Loading /</span>
+            <TableRow>
+              <TableCell colSpan={4}>Loading</TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>

@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableCell,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -51,10 +52,17 @@ export default function Checkout() {
   // Fetch product details from Id
   const fetchProduct = async (code: number) => {
     if (!code) return;
-    const response = await fetch(`/api/get?id=${code}`);
-    const res = await response.json();
-    setProducts((pdts) => [...pdts, res]);
-    setPrice(price + res.price);
+    const res = await fetch(`/api/get?id=${code}`);
+    const data = await res.json();
+    if (res.ok) {
+      setProducts((pdts) => [...pdts, data]);
+      setPrice(price + data.price);
+    } else {
+      toast({
+        title: "Invalid barcode",
+        description: "There is no product which matches this barcode",
+      });
+    }
   };
 
   return (
@@ -65,7 +73,7 @@ export default function Checkout() {
         <div className="items-center gap-1.5">
           <span>Upload barcode</span>
           <Input
-            className="w-64"
+            className="w-64 m-2 bg-accent border-2 border-border"
             type="file"
             accept="image/*"
             onChange={decodeBarcode}
@@ -75,7 +83,7 @@ export default function Checkout() {
       <Table className="my-16">
         <TableCaption>Bill Checkout</TableCaption>
         <TableHeader>
-          <TableRow>
+          <TableRow className="border-foreground">
             <TableHead>Name</TableHead>
             <TableHead>Quantity</TableHead>
             <TableHead>Price</TableHead>
@@ -83,15 +91,22 @@ export default function Checkout() {
         </TableHeader>
         <TableBody>
           {products.map((item) => (
-            <TableRow key={item.id}>
+            <TableRow className="border-border" key={item.id}>
               <TableCell className="p-6 text-lg">{item.name}</TableCell>
               <TableCell className="text-lg">1</TableCell>
               <TableCell className="text-lg">{item.price}</TableCell>
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter className="border-border">
+          <TableRow className="bg-accent text-xl">
+            <TableCell className="py-4" colSpan={2}>
+              Total
+            </TableCell>
+            <TableCell>{price}</TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
-      <span className="flex justify-end text-2xl">Total: {price}</span>
     </div>
   );
 }
